@@ -2,6 +2,7 @@ package software.ulpgc.katas;
 
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
+import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import software.ulpgc.katas.architecture.UseCase;
 import software.ulpgc.katas.architecture.ports.Input;
@@ -16,7 +17,7 @@ public class Main {
         Javalin.create(Main::init).start(8080);
     }
 
-    private static void init(JavalinConfig config) {
+    static void init(JavalinConfig config) {
         var catalog = new JsonMovieCatalog().load();
         UseCase useCase = new SelectRandomMoviesUseCase(catalog, new GsonSeriesSerializer());
         config.routes.get("/movies", context -> movies(context, useCase));
@@ -24,7 +25,14 @@ public class Main {
 
     private static void movies(Context context, UseCase useCase) {
         Input input = new ContextInput(context);
-        Output output = useCase.execute(input);
+        Output output;
+        try {
+            output = useCase.execute(input);
+        } catch (NumberFormatException e) {
+            throw new BadRequestResponse("Provide an integer for the 'n' query parameter.");
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestResponse(e.getMessage());
+        }
         context.contentType("application/json").result(output.result());
     }
 
