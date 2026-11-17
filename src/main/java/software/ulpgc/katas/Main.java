@@ -17,7 +17,7 @@ public class Main {
         Javalin.create(Main::init).start(8080);
     }
 
-    private static void init(JavalinConfig config) {
+    static void init(JavalinConfig config) {
         var catalog = new JsonBookCatalog().load();
         UseCase useCase = new SelectRandomBooksUseCase(catalog, new GsonBookListSerializer());
         config.routes.get("/books", context -> books(context, useCase));
