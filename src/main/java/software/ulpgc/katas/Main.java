@@ -17,7 +17,7 @@ public class Main {
         Javalin.create(Main::init).start(8080);
     }
 
-    private static void init(JavalinConfig config) {
+    static void init(JavalinConfig config) {
         var catalog = new JsonVideogameCatalog().load();
         UseCase useCase = new SelectRandomVideogamesUseCase(catalog, new GsonVideogameListSerializer());
         config.routes.get("/videogames", context -> videogames(context, useCase));
